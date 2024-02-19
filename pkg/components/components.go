@@ -8,8 +8,8 @@ import (
 
 type ComponentName string
 type Component interface {
-	whenCreated(r *sdl.Renderer) error
-	whenDeleted() error
+	WhenCreated(r *sdl.Renderer) error
+	WhenDeleted() error
 }
 
 // Physics/position-related components
@@ -17,12 +17,12 @@ type vec2 struct {
 	X, Y float32
 }
 
-func (v *vec2) whenCreated(_ *sdl.Renderer) error {
+func (v *vec2) WhenCreated(_ *sdl.Renderer) error {
 	v.X = 0
 	v.Y = 0
 	return nil
 }
-func (v *vec2) whenDeleted() error {
+func (v *vec2) WhenDeleted() error {
 	return nil
 }
 
@@ -37,7 +37,7 @@ type Drawable struct {
 	texture       *sdl.Texture
 }
 
-func (d *Drawable) whenCreated(r *sdl.Renderer) error {
+func (d *Drawable) WhenCreated(r *sdl.Renderer) error {
 	img, err := sdl.LoadBMP(d.TexturePath)
 	if err != nil {
 		panic(fmt.Errorf("loading image %s: %v", d.TexturePath, err))
@@ -51,7 +51,10 @@ func (d *Drawable) whenCreated(r *sdl.Renderer) error {
 
 	return nil
 }
-func (d *Drawable) whenDeleted() error {
+func (d *Drawable) WhenDeleted() error {
 	d.texture.Destroy()
 	return nil
+}
+func Test123() {
+	fmt.Println("THIS IS A FUNCTIONS! THIS FILES EXISTS! GO IS STUPID")
 }
