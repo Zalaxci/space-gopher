@@ -7,33 +7,36 @@ import (
 
 type EntityCategory struct {
 	Name       string
-	Components map[components.ComponentName][]components.Component
+	Components map[components.ComponentName][]*components.Component
 }
 
 func createEntityCategory(
-	renderer *sdl.Renderer,
 	name string,
 	entityComponents map[components.ComponentName]components.Component,
 	entityCount uint16,
-	maxEntityCount uint16,
-) (entityCat *EntityCategory) {
-	// Set the entity's name
+	modifyEachComponent func(compName components.ComponentName, entityID uint16, comp *components.Component),
+) *EntityCategory {
+	// Create a new entity category and set its name
+	entityCat := EntityCategory{}
 	entityCat.Name = name
+	// Create a map of ComponentNames to a list (slice) of components for each entity
+	entityCat.Components = make(map[components.ComponentName][]*components.Component)
+	// Iterate over all provided components and needed entities
 	var i uint16
-	// Iterate over all provided components
 	for compName, comp := range entityComponents {
-		// Run the "WhenCreated" function to initialize each one
-		comp.WhenCreated(renderer)
-		// Create a list (slice) of components for each entity. Store the list on the map of components with the component name as the key
-		entityCat.Components[compName] = make([]components.Component, 0, maxEntityCount)
-		// Add the (same) component for every entity
 		for i = 0; i < entityCount; i++ {
-			entityCat.Components[compName] = append(entityCat.Components[compName], comp)
+			// For each entity, store a copy of the component in a new variable
+			currComponent := comp
+			// Run the "WhenCreated" function to initialize the component, and modify the component according the function passed as a parameter
+			currComponent.WhenCreated()
+			modifyEachComponent(compName, i, &currComponent)
+			// Finally, append the component to the list
+			entityCat.Components[compName] = append(entityCat.Components[compName], &currComponent)
 		}
 	}
-	return
+	return &entityCat
 }
-func (entityCat *EntityCategory) addEntity(
+func (entityCat *EntityCategory) AddEntity(
 	renderer *sdl.Renderer,
 	entityComponents map[components.ComponentName]components.Component,
 ) {
@@ -45,8 +48,8 @@ func (entityCat *EntityCategory) addEntity(
 			panic("attempted to add entity to entity list " + entityCat.Name + " without providing all necessary components")
 		}
 		// Initialize the component
-		newComp.WhenCreated(renderer)
+		newComp.WhenCreated()
 		// Add it to the list of components for every entity
-		entityCat.Components[compName] = append(entityCat.Components[compName], newComp)
+		entityCat.Components[compName] = append(entityCat.Components[compName], &newComp)
 	}
 }

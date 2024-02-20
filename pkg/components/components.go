@@ -8,53 +8,52 @@ import (
 
 type ComponentName string
 type Component interface {
-	WhenCreated(r *sdl.Renderer) error
-	WhenDeleted() error
+	WhenCreated()
+	WhenDeleted()
 }
 
-// Physics/position-related components
-type vec2 struct {
+// Vector components
+type Vec2 struct {
 	X, Y float32
 }
 
-func (v *vec2) WhenCreated(_ *sdl.Renderer) error {
+func (v *Vec2) WhenCreated() {
 	v.X = 0
 	v.Y = 0
-	return nil
 }
-func (v *vec2) WhenDeleted() error {
-	return nil
+func (v *Vec2) WhenDeleted() {}
+
+type Vec3 struct {
+	X, Y, Z float32
 }
 
-type Pos vec2
-type Velocity vec2
-type Accelaration vec2
+func (v *Vec3) WhenCreated() {
+	v.X = 0
+	v.Y = 0
+	v.Z = 0
+}
+func (v *Vec3) WhenDeleted() {}
 
 // Rendering-related components
 type Drawable struct {
+	Renderer      *sdl.Renderer
 	TexturePath   string
+	Texture       *sdl.Texture
 	ScalingFactor float32
-	texture       *sdl.Texture
 }
 
-func (d *Drawable) WhenCreated(r *sdl.Renderer) error {
+func (d *Drawable) WhenCreated() {
 	img, err := sdl.LoadBMP(d.TexturePath)
 	if err != nil {
 		panic(fmt.Errorf("loading image %s: %v", d.TexturePath, err))
 	}
 	defer img.Free()
 
-	d.texture, err = r.CreateTextureFromSurface(img)
+	d.Texture, err = d.Renderer.CreateTextureFromSurface(img)
 	if err != nil {
 		panic(fmt.Errorf("creating texture from image %s: %v", d.TexturePath, err))
 	}
-
-	return nil
 }
-func (d *Drawable) WhenDeleted() error {
-	d.texture.Destroy()
-	return nil
-}
-func Test123() {
-	fmt.Println("THIS IS A FUNCTIONS! THIS FILES EXISTS! GO IS STUPID")
+func (d *Drawable) WhenDeleted() {
+	d.Texture.Destroy()
 }
