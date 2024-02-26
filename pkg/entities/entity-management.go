@@ -2,7 +2,6 @@ package entities
 
 import (
 	"github.com/Zalaxci/space-gopher/pkg/components"
-	"github.com/veandco/go-sdl2/sdl"
 )
 
 type EntityCategory struct {
@@ -37,7 +36,6 @@ func createEntityCategory(
 	return &entityCat
 }
 func (entityCat *EntityCategory) AddEntity(
-	renderer *sdl.Renderer,
 	entityComponents map[components.ComponentName]components.Component,
 ) {
 	// Iterate over all pre-existing components
@@ -51,5 +49,15 @@ func (entityCat *EntityCategory) AddEntity(
 		newComp.WhenCreated()
 		// Add it to the list of components for every entity
 		entityCat.Components[compName] = append(entityCat.Components[compName], &newComp)
+	}
+}
+func (entityCat *EntityCategory) DestroyAll() {
+	var i, entityCount uint16
+	for compName := range entityCat.Components {
+		entityCount = uint16(len(entityCat.Components[compName]))
+		for i = 0; i < entityCount; i++ {
+			(*entityCat.Components[compName][i]).WhenDeleted()
+		}
+		entityCat.Components[compName] = nil
 	}
 }

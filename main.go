@@ -51,6 +51,7 @@ func main() {
 
 	player := entities.CreatePlayer(renderer)
 	playerDrawable := (*player.Components["Drawable"][0]).(*components.Drawable)
+	defer player.DestroyAll()
 
 	var event sdl.Event
 	for !windowWasClosed(&event) {
